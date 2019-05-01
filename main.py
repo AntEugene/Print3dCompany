@@ -1,5 +1,5 @@
 import sys
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QMessageBox, QTableWidget, QTableWidgetItem
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
 import AuthorizationWindow
@@ -42,8 +42,26 @@ class MainWindow(QtWidgets.QDialog, MainWindowDesign.Ui_Dialog):
         self.setupUi(self)
         self.Button_Show.clicked.connect(self.allUsersWindow)
         self.WhoIsIt = Login
-        self.tableWidget.hide()
-        #self.Button_Add.clicked.connect(self.addFunc) # TODO
+        self.Button_Add.clicked.connect(self.addFunc)
+        self.Button_Save.clicked.connect(self.saveInDB)
+
+    def addFunc(self):
+        self.tableWidget.setRowCount(0)
+        tableName = self.lineEdit_TableName.text().lower() # Get the name of the table
+        if (self.checkTableAccess(tableName, self.WhoIsIt)):
+            self.getTableColumns(tableName)
+            self.showTable(tableName)
+        self.tableWidget.insertRow(self.tableWidget.rowCount())
+        self.rowPosition = self.tableWidget.rowCount() - 1
+
+    def saveInDB(self, rowPosition, tableName):
+        tableName = self.lineEdit_TableName.text().lower() # Get the name of the table
+        numberOfColumns = len(self.tableColumnsList)
+        insertInDB = list()
+        for i in range(numberOfColumns):
+            tableItem = self.tableWidget.item(rowPosition, i)
+            insertInDB.append(tableItem.text())
+        print (insertInDB)
 
 
     def checkTableAccess(self, tableName, userName):
@@ -93,6 +111,7 @@ class MainWindow(QtWidgets.QDialog, MainWindowDesign.Ui_Dialog):
 
 
     def showTable(self, tableName):
+        self.tableWidget.setRowCount(0)
         query = QSqlQuery()
         query.exec("SELECT * FROM " + tableName + ";")
         numberOfColumns = len(self.tableColumnsList)
@@ -102,10 +121,10 @@ class MainWindow(QtWidgets.QDialog, MainWindowDesign.Ui_Dialog):
         self.tableWidget.setHorizontalHeaderLabels(self.tableColumnsList)
         # Show the answer in table
         while(query.next()):
-            rowPosition = self.tableWidget.rowCount()
-            self.tableWidget.insertRow(rowPosition)
+            self.rowPosition = self.tableWidget.rowCount()
+            self.tableWidget.insertRow(self.rowPosition)
             for i in range(0, numberOfColumns):
-                self.tableWidget.setItem(rowPosition, i, QtWidgets.QTableWidgetItem(str(query.value(i))))
+                self.tableWidget.setItem(self.rowPosition, i, QtWidgets.QTableWidgetItem(str(query.value(i))))
         
         self.tableWidget.resizeColumnsToContents()
         self.tableWidget.show()
