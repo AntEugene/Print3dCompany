@@ -40,16 +40,10 @@ class MainWindow(QtWidgets.QDialog, MainWindowDesign.Ui_Dialog):
     def __init__(self, Login, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
-        self.Button_Show.clicked.connect(self.showFunc)
+        self.Button_Show.clicked.connect(self.allUsersWindow)
         self.WhoIsIt = Login
         self.tableWidget.hide()
         #self.Button_Add.clicked.connect(self.addFunc) # TODO
-
-    # Show all from table
-    def showFunc(self):
-        self.tableName_ForShow = self.lineEdit_TableName.text() # Get the name of the table
-        # Who Use this programm?
-        self.allUsersWindow(self)
 
 
     def checkTableAccess(self, tableName, userName):
@@ -91,9 +85,8 @@ class MainWindow(QtWidgets.QDialog, MainWindowDesign.Ui_Dialog):
             self.tableColumnsList.append(queryColumns.value(0))
 
 
-    @staticmethod
     def allUsersWindow(self):
-        tableName = self.tableName_ForShow.lower() # Local table name (taken from showFunc)
+        tableName = self.lineEdit_TableName.text().lower() # Get the name of the table
         if (self.checkTableAccess(tableName, self.WhoIsIt)):
             self.getTableColumns(tableName)
             self.showTable(tableName)
