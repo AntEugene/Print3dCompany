@@ -31,7 +31,6 @@ class Authorization(QtWidgets.QMainWindow, AuthorizationWindow.Ui_MainWindow):
             errorWin.exec_()
             raise Exception('Wrong password or login.')
         else:
-            print("Connected!")
             Authorization.hide(self)
             self.dialog.show() # Show MainWindow
             
@@ -45,35 +44,47 @@ class MainWindow(QtWidgets.QDialog, MainWindowDesign.Ui_Dialog):
         self.Button_Add.clicked.connect(self.addFunc)
         self.Button_Save.clicked.connect(self.saveInDB)
 
-    def addFunc(self):
-        self.tableWidget.setRowCount(0)
-        tableName = self.lineEdit_TableName.text().lower() # Get the name of the table
-        if (self.checkTableAccess(tableName, self.WhoIsIt)):
-            self.getTableColumns(tableName)
-            self.showTable(tableName)
-        self.tableWidget.insertRow(self.tableWidget.rowCount())
-        self.rowPosition = self.tableWidget.rowCount() - 1
 
-    def saveInDB(self, rowPosition, tableName):
-        tableName = self.lineEdit_TableName.text().lower() # Get the name of the table
+    def addFunc(self):
+        '''
+        Adds a row to a table
+        '''
+        self.tableWidget.setRowCount(0)
+        if (self.checkTableAccess(self.WhoIsIt)):
+            self.getTableColumns()
+            self.showTable()
+        self.tableWidget.insertRow(self.tableWidget.rowCount())
+        rowPositionCopy = self.tableWidget.rowCount()
+        self.tableWidget.setItem(rowPositionCopy-1, 0, QtWidgets.QTableWidgetItem(str(rowPositionCopy)))
+
+
+
+    def saveInDB(self):
+        '''
+        Saves the filled row in the database
+        '''
+        rowPositionCopy = self.tableWidget.rowCount() - 1
         numberOfColumns = len(self.tableColumnsList)
         insertInDB = list()
         for i in range(numberOfColumns):
-            tableItem = self.tableWidget.item(rowPosition, i)
+            tableItem = self.tableWidget.item(rowPositionCopy, i)
             insertInDB.append(tableItem.text())
-        print (insertInDB)
+        querySaveDB = QSqlQuery()
+        FormatStr = ["\'" + str(i) + "\'," for i in insertInDB]
+        FormatStr[-1] = FormatStr[-1][:-1]
+        querySaveDB.exec("INSERT INTO " + self.tableName + " VALUES(" + "".join(map(str, FormatStr)) + ");")
 
 
-    def checkTableAccess(self, tableName, userName):
+    def checkTableAccess(self, userName):
         """
         Check permissions for each user.
         """
         if (userName == "manager"):
             managerAccess = ["clients", "orders"]
-            if (tableName in managerAccess):
+            if (self.tableName in managerAccess):
                 return True
             else:
-                errorWin = QMessageBox()
+                errorWin = QMessageBox() # Window with access error
                 errorWin.setIcon(QMessageBox.Critical)
                 errorWin.setWindowTitle("Ошибка доступа")
                 errorWin.setInformativeText("Нет доступа к запрошенной таблице.\nИли имя таблицы введено некорректно!")
@@ -81,10 +92,10 @@ class MainWindow(QtWidgets.QDialog, MainWindowDesign.Ui_Dialog):
                 return False
         elif (userName == "engineer"):
             engineerAccess = ["models_3d", "materials", "printers", "tasks"]
-            if (tableName in engineerAccess):
+            if (self.tableName in engineerAccess):
                 return True
             else:
-                errorWin = QMessageBox()
+                errorWin = QMessageBox() # Window with access error
                 errorWin.setIcon(QMessageBox.Critical)
                 errorWin.setWindowTitle("Ошибка доступа")
                 errorWin.setInformativeText("Нет доступа к запрошенной таблице.\nИли имя таблицы введено некорректно!")
@@ -92,28 +103,28 @@ class MainWindow(QtWidgets.QDialog, MainWindowDesign.Ui_Dialog):
                 return False
 
 
-    def getTableColumns(self, tableName):
+    def getTableColumns(self):
         """
         Get column names from the table.
         """
         queryColumns = QSqlQuery()
         self.tableColumnsList = list()
-        queryColumns.exec("SELECT column_name FROM information_schema.columns WHERE information_schema.columns.table_name=\'" + tableName + "\';") 
+        queryColumns.exec("SELECT column_name FROM information_schema.columns WHERE information_schema.columns.table_name=\'" + self.tableName + "\';") 
         while(queryColumns.next()):
             self.tableColumnsList.append(queryColumns.value(0))
 
 
     def allUsersWindow(self):
-        tableName = self.lineEdit_TableName.text().lower() # Get the name of the table
-        if (self.checkTableAccess(tableName, self.WhoIsIt)):
-            self.getTableColumns(tableName)
-            self.showTable(tableName)
+        self.tableName = self.lineEdit_TableName.text().lower() # Get the name of the table
+        if (self.checkTableAccess(self.WhoIsIt)):
+            self.getTableColumns()
+            self.showTable()
 
 
-    def showTable(self, tableName):
+    def showTable(self):
         self.tableWidget.setRowCount(0)
         query = QSqlQuery()
-        query.exec("SELECT * FROM " + tableName + ";")
+        query.exec("SELECT * FROM " + self.tableName + ";")
         numberOfColumns = len(self.tableColumnsList)
         self.tableWidget.setShowGrid(True) # User friendly interface
         self.tableWidget.setColumnCount(numberOfColumns)
@@ -125,10 +136,11 @@ class MainWindow(QtWidgets.QDialog, MainWindowDesign.Ui_Dialog):
             self.tableWidget.insertRow(self.rowPosition)
             for i in range(0, numberOfColumns):
                 self.tableWidget.setItem(self.rowPosition, i, QtWidgets.QTableWidgetItem(str(query.value(i))))
-        
+
+
+            
         self.tableWidget.resizeColumnsToContents()
         self.tableWidget.show()
-
 
 
 def main():
