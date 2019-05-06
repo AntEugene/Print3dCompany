@@ -19,7 +19,8 @@ class Authorization(QtWidgets.QMainWindow, AuthorizationWindow.Ui_MainWindow):
         db.setHostName('localhost')
         db.setPort(5432)
         db.setDatabaseName('print3dcompany')
-        db.setUserName(self.lineEdit_Login.text())
+        #db.setUserName(self.lineEdit_Login.text())
+        db.setUserName('postgres')
         db.setPassword(Password)
         connected = db.open()
         if (not connected):

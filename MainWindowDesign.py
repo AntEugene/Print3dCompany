@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file './MainWindowDesign.ui'
+# Form implementation generated from reading ui file 'MainWindowDesign.ui'
 #
 # Created by: PyQt5 UI code generator 5.12.1
 #
@@ -41,7 +41,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        Dialog.setWindowTitle(_translate("Dialog", "Главное окно"))
         self.Button_Add.setText(_translate("Dialog", "Добавить"))
         self.Button_Show.setText(_translate("Dialog", "Показать"))
         self.label.setText(_translate("Dialog", "Название таблицы:"))

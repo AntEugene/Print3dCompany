@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Главное окно</string>
   </property>
   <widget class="QPushButton" name="Button_Add">
    <property name="geometry">
