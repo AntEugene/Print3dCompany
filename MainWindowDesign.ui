@@ -61,16 +61,6 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_TableName">
-   <property name="geometry">
-    <rect>
-     <x>150</x>
-     <y>510</y>
-     <width>311</width>
-     <height>30</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
@@ -95,6 +85,19 @@
    </property>
    <property name="text">
     <string>Сохранить в БД</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>510</y>
+     <width>311</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="currentText">
+    <string/>
    </property>
   </widget>
  </widget>
